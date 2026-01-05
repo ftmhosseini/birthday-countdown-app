@@ -1,0 +1,38 @@
+footer{
+    background-color: #222 !important;
+    color: white !important;
+    text-align: center !important;
+    background-size: cover !important;
+    padding: 40px 0;
+}
+footer a{
+    font-size: 20px !important;
+    color: #0dcaf0;
+    margin: 0 10px;
+}
+
+main{
+    margin-top: 100px;
+    margin-bottom: 250px;
+    padding: 100px auto !important;
+}
+
+/* Carousel container */
+#carousel {
+  width: 100%;
+  height: 400px;           /* 👈 fixed height (change as you like) */
+  overflow: hidden;
+}
+
+/* Carousel inner */
+#carousel .carousel-inner,
+#carousel .carousel-item {
+  height: 100%;
+}
+
+/* Images */
+#carousel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;       /* 👈 fills area without distortion */
+}
