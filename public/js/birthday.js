@@ -1,7 +1,8 @@
 import { loadCarousel } from './carousel.js';
 
-export function showBirthdayPage(userDob) {
-    console.log('🎂 Birthday page loaded:', userDob);
+export function showBirthdayPage(user) {
+    
+    console.log('🎂 Birthday page loaded:', user.dob);
 
     const form = document.querySelector('.form');
     const carousel = document.getElementById('carousel');
@@ -11,7 +12,7 @@ export function showBirthdayPage(userDob) {
         return;
     }
 
-    if (!userDob) {
+    if (!user.dob) {
         form.innerHTML = `<p class="text-danger">Birthday not available</p>`;
         return;
     }
@@ -19,7 +20,7 @@ export function showBirthdayPage(userDob) {
     carousel.style.display = 'none';
 
     const today = new Date();
-    const dob = new Date(userDob);
+    const dob = new Date(user.dob);
 
     if (isNaN(dob.getTime())) {
         form.innerHTML = `<p class="text-danger">Invalid birthday</p>`;
@@ -48,7 +49,7 @@ export function showBirthdayPage(userDob) {
     <div class="card p-4 text-center">
       <h2>${isBirthday ? '🎉 Happy Birthday!' : '🎂 Birthday Countdown'}</h2>
       <p class="fs-4">
-        ${isBirthday ? 'Today is your special day!' : `${daysLeft} days left`}
+        ${isBirthday ? `Today is your special day! Happy Birthday ${user.name}` : `${daysLeft} days left to ${user.username} birthday`}
       </p>
       <button id="back-home" class="btn btn-dark mt-3">Back to Home</button>
     </div>

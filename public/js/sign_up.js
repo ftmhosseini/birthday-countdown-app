@@ -1,3 +1,8 @@
+import {
+  createUserWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+
 export function showSignupForm() {
 
     console.log("Signup form initialized");
@@ -32,13 +37,15 @@ export function showSignupForm() {
             }else{
                  message.textContent = '';
             }
-            console.log('salam br');
+            
             const res = await fetch('/api/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password, dob })
             });
+            // console.log(auth, name, email, password, dob);
             
+            // const res = await createUserWithEmailAndPassword(auth, name, email, password, dob );
 
             if (res.ok) {
                 // ✅ NAVIGATE TO HOME

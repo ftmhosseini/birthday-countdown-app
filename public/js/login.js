@@ -1,3 +1,7 @@
+// import {
+//     signInWithEmailAndPassword
+// } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
 import { showBirthdayPage } from './birthday.js';
 import { showSignOut } from '../app.js';
 
@@ -27,30 +31,27 @@ export function showLoginForm() {
                 message.textContent = 'You have to fill the form';
                 return; // ⛔ stop here
             }
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
+            try {
+                // mysql version
 
-            console.log(res);
-            const data = await res.json();
-            console.log(data);
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
 
-            // message.textContent =
-            //     res.ok ? 'Login successful' : data.message;
-            if (res.ok) {
-                // ✅ DOB COMES FROM BACKEND (recommended)
-                showSignOut(); 
-                console.log(data.date_of_birth);
-                console.log(res.body);
-                
-                
-                showBirthdayPage(data.date_of_birth);
-                // example fallback:
-                // showBirthdayPage('1999-08-25');
-            } else {
-                message.textContent = data.message;
+                const user = await res.json();
+
+                if (res.ok) {
+                    // ✅ DOB COMES FROM BACKEND (recommended)
+                    showSignOut();
+                    showBirthdayPage(user[0]);
+                } else {
+                     message.textContent = `${res.statusText}: your email and password were not matched`;
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                message.textContent = "Cannot connect to server.";
             }
         });
 }
