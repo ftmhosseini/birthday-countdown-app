@@ -1,68 +1,64 @@
 import pool from '../utilities/mysql_db.js';
-import { db } from '../utilities/firebase_db.js';
-import {ref, get, set, push } from "firebase/database";
+import { db_firebase } from '../utilities/firebase_db.js';
+import { ref, get, set, push, query, orderByChild, equalTo } from "firebase/database";
 
 export default class LoginModel {
-    static getInfo = async (email) => {
-        const [result] = await pool.query('select dob from users where email=?', [email]);
-        return result[0]
-    }
-    static insertUser = async (email, name, password, dob, tel = '00000') => {
-        // const [result] = await pool.query('insert into users (email, name, password, date_of_birth) value(?,?,?,?)', [email, name, password, dob]);
-        // return result[0]
-        this.writeUserData({
+    static insertUser = async (db, email, name, password, dob) => {
+        if (db === 'mysql') {
+            const [result] = await pool.query('insert into users (email, name, password, date_of_birth) value(?,?,?,?)', [email, name, password, dob]);
+            console.log(result);
+            
+            return result[0]
+        }
+        else return this.writeUserData({
             email: email,
-            phone: tel,
-            // phone: phone ?? '00000',
             name: name,
             password: password,
-            dob: dob})
+            dob: dob
+        })
     }
     static writeUserData = async (obj) => {
+        try {
+            console.log(`obj is firebase version is ${obj.name}`)
 
-        const emailKey = normalizeEmail(obj.email);
-        const emailRef = ref(db, "emails/" + emailKey);
-        console.log(emailKey);
-        console.log(`emails are ${ref(db, "userId/" + emailRef.id)}`);
+            const snapshot = await get(query(ref(db_firebase, 'userss'), orderByChild('email'), equalTo(obj.email)));
+            console.log(snapshot);
 
-        // 🔍 Check if email already exists
-        const snapshot = await get(emailRef);
-        console.log(`snapshot are ${snapshot.val}`);
-
-        if (snapshot.exists()) {
-            throw new Error("Email already exists");
+            if (snapshot.exists()) {
+                return { ok: false, error: 'Email already exists' };
+            }
+            console.log(await push(ref(db_firebase, 'userss'), {
+                name: obj.name,
+                email: obj.email,
+                password: obj.password,
+                date_of_birth: obj.dob
+            }));
+            return { ok: true };
+        } catch (error) {
+            console.error("Error saving data: ", error);
+            return { ok: false, error };
         }
-        // ✅ Create user ID
-        const userRef = push(ref(db, "users"));
-        const userId = userRef.key;
-
-        await set(userRef, {
-            username: obj.name,
-            email: obj.email,
-            tel: obj.phone,
-            psd: obj.password,
-            dob: obj.dob
-        });
-
-        await set(emailRef, userId);
-        console.log('done!!!');
-
     }
 
-    static checkAuthentication = async (email, password) => {
-        // const [result] = await pool.query('select * from users where email=? and password=? ', [email, password]);
-        // return result[0]
-        const users = await db.ref('users').once('value');
-        const usersData =  users.exists() ? Object.values(users.val()) : [];
-        const result = usersData.filter(
-            user => user.email === email && user.psd === password
-        )
-        console.log(`the query of authentication is ${result}`);
-        
-        return result;
-    }
-}
+    static checkAuthentication = async (db, email, password) => {
+        if (db === 'mysql') {
+            const [result] = await pool.query('select * from users where email=? and password=? ', [email, password]);
+            console.log(`the result in mysql is ${result}`)
+            return result
+        }
+        else {
+            const userData = { email, password };
 
-function normalizeEmail(email) {
-  return email.toLowerCase().replace(/\./g, "_");
+            const snapshot = await get(ref(db_firebase, 'userss'), userData);
+            console.log(snapshot);
+
+            if (!snapshot.exists()) return [];
+
+            const users = Object.values(snapshot.val());
+            const result = users.filter(
+                user => user.email === email && user.password === password
+            )
+            return result;
+        }
+    }
 }

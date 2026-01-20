@@ -1,8 +1,7 @@
-// import result from 'underscore';
 import LoginModel from '../models/login_model.js'
 
 export const createAccount = async (req, res) => {
-    const { name, email, password, dob } = req.body;
+    const { db, name, email, password, dob } = req.body;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!name) {
         res.status(400).send('name is required!!')
@@ -17,15 +16,19 @@ export const createAccount = async (req, res) => {
         res.status(400).send('bith date is required!!')
     }
     try {
-        const result = await LoginModel.insertUser(email, name, password, dob);
-        res.status(201).json({result});
+        const result = await LoginModel.insertUser(db, email, name, password, dob);
+        console.log(result);
+        if (result.ok)
+            res.status(201).json({result });
+        return res.status(409).json({ result });
     } catch (error) {
-        res.status(500).send('Database error: ' + error.message);
+
+        return res.status(500).json({ message: `Database error: ${error.message}`, error: error.message });
     }
 }
 
 export const login = async (req, res) => {
-    const { email, password } = req.body;
+    const { db, email, password } = req.body;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(email)) {
@@ -34,24 +37,18 @@ export const login = async (req, res) => {
     if (!password) {
         res.status(400).send('password is required!!')
     }
+    console.log(req.body);
 
     try {
-        const result = await LoginModel.checkAuthentication(email, password);
-        if (!result) return res.status(401).json({message: 'Invalid email or password'});
-        res.status(200).json(result);
+        const result = await LoginModel.checkAuthentication(db, email, password);
+        if (!result || result.length === 0) { return res.status(401).json({ message: 'Invalid email or password' }); }
+        res.status(200).json(result)
     } catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.log(`error in controller is ${error}`);
+
+        res.status(500).json({ message: `Server error: ${error}` });
     }
 }
 
-export const getBirth = async (req, res) => {
-    try {
-        const result = await LoginModel.getInfo(email, password);
-        if (!result) return res.status(401).json({message: 'Invalid email or password'});
-        res.status(200).json(result);
-    } catch (error) {
-        res.status(500).json({ message: 'Server error' });
-    }
-}
 
 

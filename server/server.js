@@ -17,16 +17,13 @@ app.use(express.static('.'));
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, '../public')));
-// app.get('/', (req, res) => {
-//   res.sendFile(path.join(__dirname, '../public/index.html'));
-// });
-app.get('/favicon.ico', (req, res) => res.sendStatus(204));
+
+// app.get('/favicon.ico', (_, res) => res.sendStatus(204));
 
 app.use('/api/carousel', carouselRoute);
 app.use('/api', loginRoute);
-app.use('/api', loginRoute);
 
-app.get('/api/firebase-config', (req, res) => {
+app.get('/api/firebase-config', (_, res) => {
   res.json({
     apiKey: process.env.API_KEY,
     authDomain: process.env.AUTH_DOMAIN,
@@ -36,6 +33,29 @@ app.get('/api/firebase-config', (req, res) => {
     messagingSenderId: process.env.MESSAGING_SENDER_ID,
     appId: process.env.APP_ID
   });
+});
+
+app.get('/api/quote', async (_, res) => {
+    try {
+        const response = await fetch('https://type.fit/api/quotes/');
+        const quotes = await response.json();
+        
+        // type.fit returns an array of objects: [{text: "...", author: "..."}]
+        const index = Math.floor(Math.random() * quotes.length);
+        const randomQuote = quotes[index];
+
+        const result = {
+            text: randomQuote.text,
+            author: randomQuote.author || "Unknown" // Handle null authors
+        };
+
+        // ✅ Send the data back to the frontend
+        res.json(result); 
+
+    } catch (err) {
+        console.error("Quote API Error:", err);
+        res.status(500).json({ error: "Failed to fetch quote" });
+    }
 });
 
 const PORT = 4000;

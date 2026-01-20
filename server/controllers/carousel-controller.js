@@ -1,9 +1,10 @@
-// import result from 'underscore';
 import CarouselModel from '../models/carousel_model.js'
 
 export const load_carousels = async (req, res) => {
+    
     try {
         const result = await CarouselModel.getImages();
+        
         res.status(200).json(result);
     } catch (error) {
         res.status(500).json({message:'Database error: ' + error.message});

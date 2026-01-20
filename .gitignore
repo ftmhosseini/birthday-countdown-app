@@ -1,3 +1,6 @@
 .env
-server/utilities/serviceAcoountKey.json
+.env.txt
+.DS_Store
+node_modules/
+server/utilities/serviceAccountKey.json
 node_modules/
