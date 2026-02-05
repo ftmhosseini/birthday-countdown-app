@@ -131,3 +131,50 @@ Ensure your Firebase Realtime Database follows this structure:
     npm install
     npm start
 ```
+
+## 🔗 Live Demo
+
+The API is deployed on Render to take advantage of Continuous Deployment (CD). By linking the GitHub repository to Render, any changes pushed to the main branch—whether bug fixes or new features—are automatically built and deployed. This ensures that recruiters and frontend collaborators always have access to the most up-to-date and stable version of the service.
+
+Check out the live API here: [https://birthday-countdown-app-gjve.onrender.com/](https://birthday-countdown-app-gjve.onrender.com/)
+
+## 🚀 Deployment Process
+
+To maintain a public GitHub repository while protecting sensitive data, this project uses a strict environment variable strategy. No Firebase credentials or private keys are stored in the source code.
+
+1. ***Web-Ready Configuration***
+
+Before deploying, the application was configured to be environment-aware:
+
+- **Dynamic Port Binding:** The server uses `process.env.PORT` to allow the hosting platform to assign a port dynamically.
+```bash
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+```
+- **Standardized Start Script:** The `package.json` includes a start script for the production environment.
+```json
+"scripts": {
+  "start": "node index.js"
+}
+```
+2. ***Security & Environment Variables (Critical)***
+
+Since the `.env` file is ignored by Git (via `.gitignore`), credentials must be manually mirrored on the hosting platform.
+
+- **Local Development:** Uses a local `.env` file.
+
+- **Production:** Credentials are added to the Environment tab in the Render Dashboard. This allows the API to remain public on GitHub while keeping the database connection private and secure.
+
+3. ***Continuous Deployment Steps***
+
+    1. **Connect:** Link the GitHub repository to a new Render Web Service.
+
+    2. **Build Settings:** * Runtime: `Node`
+
+        - **Build Command:** `npm install`
+
+        - **Start Command:** `npm start`
+
+    3. **Variables:** Inject all required keys (API Keys, Database URL, etc.) into the Render Environment settings.
+
+    4. **Live:** Render pulls the code, installs dependencies, and serves the API at the live URL.

@@ -17,7 +17,6 @@ export const createAccount = async (req, res) => {
     }
     try {
         const result = await LoginModel.insertUser(db, email, name, password, dob);
-        console.log(result);
         if (result.ok)
             res.status(201).json({result });
         return res.status(409).json({ result });
@@ -37,15 +36,12 @@ export const login = async (req, res) => {
     if (!password) {
         res.status(400).send('password is required!!')
     }
-    console.log(req.body);
 
     try {
         const result = await LoginModel.checkAuthentication(db, email, password);
         if (!result || result.length === 0) { return res.status(401).json({ message: 'Invalid email or password' }); }
         res.status(200).json(result)
     } catch (error) {
-        console.log(`error in controller is ${error}`);
-
         res.status(500).json({ message: `Server error: ${error}` });
     }
 }

@@ -6,7 +6,6 @@ export default class LoginModel {
     static insertUser = async (db, email, name, password, dob) => {
         if (db === 'mysql') {
             const [result] = await pool.query('insert into users (email, name, password, date_of_birth) value(?,?,?,?)', [email, name, password, dob]);
-            console.log(result);
             
             return result[0]
         }
@@ -19,20 +18,18 @@ export default class LoginModel {
     }
     static writeUserData = async (obj) => {
         try {
-            console.log(`obj is firebase version is ${obj.name}`)
 
             const snapshot = await get(query(ref(db_firebase, 'userss'), orderByChild('email'), equalTo(obj.email)));
-            console.log(snapshot);
 
             if (snapshot.exists()) {
                 return { ok: false, error: 'Email already exists' };
             }
-            console.log(await push(ref(db_firebase, 'userss'), {
+            await push(ref(db_firebase, 'userss'), {
                 name: obj.name,
                 email: obj.email,
                 password: obj.password,
                 date_of_birth: obj.dob
-            }));
+            });
             return { ok: true };
         } catch (error) {
             console.error("Error saving data: ", error);
@@ -43,15 +40,12 @@ export default class LoginModel {
     static checkAuthentication = async (db, email, password) => {
         if (db === 'mysql') {
             const [result] = await pool.query('select * from users where email=? and password=? ', [email, password]);
-            console.log(`the result in mysql is ${result}`)
             return result
         }
         else {
             const userData = { email, password };
 
             const snapshot = await get(ref(db_firebase, 'userss'), userData);
-            console.log(snapshot);
-
             if (!snapshot.exists()) return [];
 
             const users = Object.values(snapshot.val());
